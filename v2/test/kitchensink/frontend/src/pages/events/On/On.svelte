@@ -2,11 +2,13 @@
     import { Events } from '@wails/runtime';
     import { writable } from 'svelte/store';
     import CodeBlock from '../../../components/CodeBlock.svelte';
+    import CodeSnippet from '../../../components/CodeSnippet.svelte';
     import description from './description.txt';
     import { UniqueID } from '../../../utils/utils';
     import FakeTerm from '../../../components/FakeTerm.svelte';
     import jsCode from './code.jsx';
     import goCode from './code.go';
+    import { loggingOutput } from './store';
 
     let isJs = false;
     $: lang = isJs ? 'Javascript' : 'Go';
@@ -16,8 +18,6 @@
     let id = UniqueID('events');
 
     let eventName = "";
-    let loggingOutput = writable("");
-
 
     function updateLog(eventName, data, source) {
         loggingOutput.update( (log) => {
@@ -37,7 +37,7 @@
             return
         }
 
-        let name = eventName + " (" + (isJs ? 'JS' : 'Go') + ")"
+        let name = '"' + eventName + '" (' + (isJs ? 'JS' : 'Go') + ")"
         if( $listeners.includes(name) ) {
             return
         }
@@ -54,33 +54,37 @@
         } else {
             // We call a function in Go to register a subscriber
             // for us
-            backend.main.Events.Subscribe(eventName);
+            backend.main.Events.On(eventName);
         }
     }
+
+    $: testcodeJs = "import { Events } from '@wails/runtime';\nEvents.On('" + eventName + "', callback);";
+    $: testcodeGo = '// runtime is given through WailsInit()\nruntime.Events.On("' + eventName + '", func(optionalData ...interface{} {\n // Process data\n}))'; 
 
 </script>
 
 <CodeBlock bind:isJs={isJs} {jsCode} {goCode} {id} title="Events.On(eventName, callback)" {description}>
     <div class="logging-form">
         <form data-wails-no-drag class="mw-full"> 
-            {#if $listeners.length > 0 }
-            Subscribed to:
-            <div class="form-group">
-                <ul class="list">
-                {#each $listeners as listener}
-                    <li>"{listener}"</li>
-                {/each}
-            </div>
-            Now use <code>Events.Emit</code> to trigger the subscribers!<br/>
-            {/if}
             <div class="form-group">
                 <label for="{id}-eventName" class="required">Event Name to subscribe to</label>
                 <input type="text" class="form-control" id="{id}-eventName" placeholder="MyEventName" bind:value="{eventName}" required="required">
             </div>
 
             <input class="btn btn-primary" type="button" on:click="{subscribe}" value="Subscribe using {lang} runtime">
-
+            <CodeSnippet bind:isJs={isJs} jsCode={testcodeJs} goCode={testcodeGo}></CodeSnippet>
+            {#if $listeners.length > 0 }
+            <div class="form-group" style="margin-top:10px">
+                Subscribed to:
+                <ul class="list">
+                {#each $listeners as listener}
+                    <li>{listener}</li>
+                {/each}
+            </div>
+            Now use <code>Events.Emit</code> to trigger the subscribers!<br/>
+            <div style="margin-top: 10px">Subscriber output will be printed below:</div>
             <FakeTerm text={$loggingOutput} style="height: 300px; overflow: scroll"></FakeTerm>
+            {/if}
 
         </form>
     </div>

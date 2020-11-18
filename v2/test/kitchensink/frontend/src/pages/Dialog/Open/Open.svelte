@@ -7,7 +7,7 @@
 
     var isJs = false;
     $: lang = isJs ? 'Javascript' : 'Go';
-    var id = "Dialog";
+    var id = "OpenDialog";
 
     let options = {
         "DefaultDirectory":           "",
@@ -19,7 +19,7 @@
         "AllowMultiple":              false,
         "ShowHiddenFiles":            false,
         "CanCreateDirectories":       false,
-        "ResolveAliases":             false,
+        "ResolvesAliases":             false,
         "TreatPackagesAsDirectories": false
     }
 

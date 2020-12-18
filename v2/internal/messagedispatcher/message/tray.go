@@ -20,7 +20,7 @@ func trayMessageParser(message string) (*parsedMessage, error) {
 
 	// Sanity check: Menu messages must be at least 2 bytes
 	if len(message) < 3 {
-		return nil, fmt.Errorf("event message was an invalid length")
+		return nil, fmt.Errorf("tray message was an invalid length")
 	}
 
 	var topic string

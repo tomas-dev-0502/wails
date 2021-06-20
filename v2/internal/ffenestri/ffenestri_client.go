@@ -1,3 +1,5 @@
+// +build !windows
+
 package ffenestri
 
 /*
@@ -15,7 +17,7 @@ import (
 	"github.com/wailsapp/wails/v2/internal/logger"
 )
 
-// Client is our implentation of messageDispatcher.Client
+// Client is our implementation of messageDispatcher.Client
 type Client struct {
 	app    *Application
 	logger logger.CustomLogger
@@ -124,8 +126,8 @@ func (c *Client) WindowSetColour(colour int) {
 	C.SetColour(c.app.app, r, g, b, a)
 }
 
-// OpenDialog will open a dialog with the given title and filter
-func (c *Client) OpenDialog(dialogOptions *dialog.OpenDialog, callbackID string) {
+// OpenFileDialog will open a dialog with the given title and filter
+func (c *Client) OpenFileDialog(dialogOptions *dialog.OpenDialog, callbackID string) {
 	filters := []string{}
 	if runtime.GOOS == "darwin" {
 		for _, filter := range dialogOptions.Filters {
@@ -148,8 +150,33 @@ func (c *Client) OpenDialog(dialogOptions *dialog.OpenDialog, callbackID string)
 	)
 }
 
-// OpenMultipleDialog will open a dialog with the given title and filter
-func (c *Client) OpenMultipleDialog(dialogOptions *dialog.OpenDialog, callbackID string) {
+
+// OpenDirectoryDialog will open a dialog with the given title and filter
+func (c *Client) OpenDirectoryDialog(dialogOptions *dialog.OpenDialog, callbackID string) {
+	filters := []string{}
+	if runtime.GOOS == "darwin" {
+		for _, filter := range dialogOptions.Filters {
+			filters = append(filters, strings.Split(filter.Pattern, ",")...)
+		}
+	}
+	C.OpenDialog(c.app.app,
+		c.app.string2CString(callbackID),
+		c.app.string2CString(dialogOptions.Title),
+		c.app.string2CString(strings.Join(filters, ";")),
+		c.app.string2CString(dialogOptions.DefaultFilename),
+		c.app.string2CString(dialogOptions.DefaultDirectory),
+		c.app.bool2Cint(false), // Files
+		c.app.bool2Cint(true), // Directories
+		c.app.bool2Cint(false), // Multiple
+		c.app.bool2Cint(dialogOptions.ShowHiddenFiles),
+		c.app.bool2Cint(dialogOptions.CanCreateDirectories),
+		c.app.bool2Cint(dialogOptions.ResolvesAliases),
+		c.app.bool2Cint(dialogOptions.TreatPackagesAsDirectories),
+	)
+}
+
+// OpenMultipleFilesDialog will open a dialog with the given title and filter
+func (c *Client) OpenMultipleFilesDialog(dialogOptions *dialog.OpenDialog, callbackID string) {
 	filters := []string{}
 	if runtime.GOOS == "darwin" {
 		for _, filter := range dialogOptions.Filters {

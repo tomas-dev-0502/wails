@@ -15,7 +15,7 @@ import (
 func main() {
 
 	// Create application with options
-	app := NewBasic()
+	app := NewApp()
 
 	err := wails.Run(&options.App{
 		Title:             "{{.ProjectName}}",

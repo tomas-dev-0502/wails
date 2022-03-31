@@ -1,10 +1,10 @@
-# Building NSIS installer
-
-Wails supports generating Windows installers using the [NSIS installer](https://nsis.sourceforge.io/).
+# NSIS installer
 
 <p style={{"text-align": "center"}}>
-   <img src="/img/nsis.png"></img><br/>
+   <img src="/img/nsis.png" style={{"max-width":"50%"}}></img><br/>
 </p>
+
+Wails supports generating Windows installers using the [NSIS installer](https://nsis.sourceforge.io/).
 
 ## Installing NSIS
 
@@ -29,17 +29,17 @@ NSIS is available to install through homebrew: `brew install nsis`.
 
 ## Generating the installer
 
-When a new project is created, Wails generates a `.nsi` installer script in `build/windows/installer`. The config
-data is read from the project's `wails.json` so you can use this to configure the installer:
+When a new project is created, Wails generates the NSIS configuration files in `build/windows/installer`. The config
+data is read from `installer/info.json` and that is configured to use the project's `wails.json` Info section:
 
 ```json
 // ...
  "Info": {
-    "companyName": "wailsvite",
-    "productName": "wailsvite",
+    "companyName": "My Company Name",
+    "productName": "Wails Vite",
     "productVersion": "1.0.0",
     "copyright": "Copyright.........",
-    "comments": "Built using Wails (https://wails.app)"
+    "comments": "Built using Wails (https://wails.io)"
   },
 ```
 

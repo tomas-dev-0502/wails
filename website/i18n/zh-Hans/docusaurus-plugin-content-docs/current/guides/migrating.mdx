@@ -23,7 +23,7 @@ Wails v2 与 v1 相比有重大变化。本文档旨在重点介绍迁移现有�
   app.Run()
 ```
 
-在 v2 中，只有一个方法`wails.Run()`接受[应用程序参数选项](/docs/reference/options#应用程序参数选项)。
+在 v2 中，只有一个方法`wails.Run()`接受[应用程序参数选项](../reference/options#应用程序参数选项)。
 
 ```go title="v2"
 	err := wails.Run(&options.App{
@@ -39,7 +39,7 @@ Wails v2 与 v1 相比有重大变化。本文档旨在重点介绍迁移现有�
 
 ### 绑定
 
-在 v1 中，可以绑定任意函数和结构。在 v2 中，这已被简化为仅绑定结构。以前传递给 v1`Bind()`中的方法的结构实例现在在[应用程序参数选项](/docs/reference/options#应用程序参数选项)`Bind`字段中指定：
+在 v1 中，可以绑定任意函数和结构。在 v2 中，这已被简化为仅绑定结构。以前传递给 v1`Bind()`中的方法的结构实例现在在[应用程序参数选项](../reference/options#应用程序参数选项)`Bind`字段中指定：
 
 ```go title="v1"
   app := wails.CreateApp(/* options */)
@@ -59,13 +59,13 @@ Wails v2 与 v1 相比有重大变化。本文档旨在重点介绍迁移现有�
 
 ### 应用程序生命周期
 
-在 v1 中，绑定结构中有 2 个特殊方法：`WailsInit()`和`WailsShutdown()`. 这些已被替换为 3 个生命周期回调，作为[应用程序参数选项](/docs/reference/options#应用程序参数选项)的一部分：
+在 v1 中，绑定结构中有 2 个特殊方法：`WailsInit()`和`WailsShutdown()`. 这些已被替换为 3 个生命周期回调，作为[应用程序参数选项](../reference/options#应用程序参数选项)的一部分：
 
-- [应用启动回调](/docs/reference/options#应用启动回调)
-- [应用退出回调](/docs/reference/options#应用退出回调)
-- [前端 Dom 加载完成回调](/docs/reference/options#前端-dom-加载完成回调)
+- [应用启动回调](../reference/options#应用启动回调)
+- [应用退出回调](../reference/options#应用退出回调)
+- [前端 Dom 加载完成回调](../reference/options#前端-dom-加载完成回调)
 
-注意：[前端 Dom 加载完成回调](/docs/reference/options#前端-dom-加载完成回调)替换了 v1 中的 `wails:ready` 系统事件。
+注意：[前端 Dom 加载完成回调](../reference/options#前端-dom-加载完成回调)替换了 v1 中的 `wails:ready` 系统事件。
 
 这些方法可以是标准函数，但通常的做法是将它们作为结构的一部分：
 
@@ -89,9 +89,9 @@ func (b *Basic) startup(ctx context.Context) {
 
 ### 运行时
 
-v2 中的运行时比 v1 丰富得多，支持菜单、窗口操作和更好的对话框。方法的签名略有变化 - 请参阅[运行时](/docs/reference/runtime/intro)。
+v2 中的运行时比 v1 丰富得多，支持菜单、窗口操作和更好的对话框。方法的签名略有变化 - 请参阅[运行时](../reference/runtime/intro)。
 
-在 v1 中，[运行时](/docs/reference/runtime/intro)可通过传递给`WailsInit()`. 在 v2 中，运行时已移出到它自己的包。运行时中的每个方法都采用`context.Context`传递给了[应用启动回调](/docs/reference/options#应用启动回调)方法。
+在 v1 中，[运行时](../reference/runtime/intro)可通过传递给`WailsInit()`. 在 v2 中，运行时已移出到它自己的包。运行时中的每个方法都采用`context.Context`传递给了[应用启动回调](../reference/options#应用启动回调)方法。
 
 ```go title="运行时示例"
 package main
@@ -156,7 +156,7 @@ func main() {
 }
 ```
 
-当然，如果您愿意，也可以使用打包工具。唯一的要求是在 Wails 中使用`embed.FS`,将最终的程序资源目录传递给[应用程序参数选项](/docs/reference/options#应用程序参数选项)的`Assets`键。
+当然，如果您愿意，也可以使用打包工具。唯一的要求是在 Wails 中使用`embed.FS`,将最终的程序资源目录传递给[应用程序参数选项](../reference/options#应用程序参数选项)的`Assets`键。
 
 ### 项目配置
 

@@ -25,3 +25,12 @@ Wails CLI 现在将是最新版本。要更新项目以使用最新版本，请�
 要恢复到稳定版本，请运行：
 
 `go install github.com/wailsapp/wails/v2/cmd/wails@latest`
+
+## 测试一个分支
+
+如果要测试一个分支，请按照上面的说明进行操作，但请确保在安装之前切换要测试的分支：
+
+- `git clone https://github.com/wailsapp/wails`
+- `git checkout -b branch-to-test --track origin/branch-to-test`
+- `cd wails/v2/cmd/wails`
+- `go install`

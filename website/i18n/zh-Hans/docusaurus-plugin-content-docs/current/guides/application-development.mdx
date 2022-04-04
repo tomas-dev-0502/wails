@@ -26,7 +26,7 @@ func (a *App) shutdown(ctx context.Context) {
 ```
 
 - `startup`方法会在 Wails 分配它需要的资源后立即调用，这是创建资源、设置事件侦听器以及应用程序在启动时需要的任何其他内容的好地方。它提供了一个`context.Context`，
-  通常保存在结构字段中。调用[运行时](/docs/reference/runtime/intro)需要此`context.Context`。如果此方法返回错误，则应用程序将终止。在开发模式下，错误会输出到控制台。
+  通常保存在结构字段中。调用[运行时](../reference/runtime/intro)需要此`context.Context`。如果此方法返回错误，则应用程序将终止。在开发模式下，错误会输出到控制台。
 - `shutdown`方法会在应用程序关闭进程时调用，这是释放内存和执行任何关闭任务的好地方。
 
 `main.go`文件通常由对`wails.Run()`的单个调用组成，它接受应用程序配置。模板使用的模式是，在调用`wails.Run()`之前，
@@ -51,7 +51,7 @@ func main() {
 
 ```
 
-可以在[此处](/docs/howdoesitwork#应用程序生命周期回调)找到有关应用程序生命周期回调的更多信息。
+可以在[此处](../howdoesitwork#应用程序生命周期回调)找到有关应用程序生命周期回调的更多信息。
 
 ## 绑定方法
 
@@ -104,11 +104,11 @@ func main() {
 
 这将绑定`App`结构中的所有公共方法(它永远不会绑定 startup 和 shutdown 方法)。
 
-可以在[此处](/docs/howdoesitwork#方法绑定)找到有关绑定的更多信息。
+可以在[此处](../howdoesitwork#方法绑定)找到有关绑定的更多信息。
 
 ## 应用程序菜单
 
-Wails 支持向您的应用程序添加菜单。 这是通过将 [菜单](/docs/reference/menus#菜单) 结构体传递给应用程序配置来完成的。
+Wails 支持向您的应用程序添加菜单。 这是通过将 [菜单](../reference/menus#菜单) 结构体传递给应用程序配置来完成的。
 常见做法是使用一个返回菜单的方法，更常见的是用作生命周期回调的 `App` 结构体上的方法。
 
 ```go {11} title="main.go"

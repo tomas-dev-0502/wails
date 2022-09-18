@@ -47,6 +47,7 @@ func main() {
         Windows: &windows.Options{
             WebviewIsTransparent:              false,
             WindowIsTranslucent:               false,
+            BackdropType:                      windows.Mica,
             DisableWindowIcon:                 false,
             DisableFramelessWindowDecorations: false,
             WebviewUserDataPath:               "",
@@ -62,6 +63,10 @@ func main() {
             },
             // User messages that can be customised
             Messages *windows.Messages
+            // OnSuspend is called when Windows enters low power mode
+            OnSuspend func()
+            // OnResume is called when Windows resumes from low power mode
+            OnResume func()
         },
         Mac: &mac.Options{
             TitleBar: &mac.TitleBar{
@@ -261,7 +266,7 @@ func main() {
 
 名称：OnShutdown<br/> 类型：`func(ctx context.Context)`
 
-### 关闭应用前
+### 应用关闭前回调
 
 如果设置了此回调，它将在通过单击窗口关闭按钮或调用`runtime.Quit`即将退出应用程序时被调用. 返回 `true` 将导致应用程序继续，`false` 将继续正常关闭。 返回 true 将导致应用程序继续，false 将继续正常关闭。 这有助于与用户确认他们希望退出程序。
 
@@ -288,11 +293,11 @@ func (b *App) beforeClose(ctx context.Context) (prevent bool) {
 
 定义窗口在启动时应如何呈现。
 
-| 值         | Win | Mac | Lin |
-| --------- | --- | --- | --- |
-| 全屏        | ✅   | ✅   | ✅   |
-| Maximised | ✅   | ✅   | ✅   |
-| Minimised | ✅   | ❌   | ✅   |
+| 值          | Win | Mac | Lin |
+| ---------- | --- | --- | --- |
+| Fullscreen | ✅   | ✅   | ✅   |
+| Maximised  | ✅   | ✅   | ✅   |
+| Minimised  | ✅   | ❌   | ✅   |
 
 名称：WindowStartState<br/> 类型：`options.WindowStartState`
 
@@ -316,7 +321,7 @@ func (b *App) beforeClose(ctx context.Context) (prevent bool) {
 
 ### Windows
 
-这定义了 [Windows 特定的选项](#windows-特定选项)。
+这定义了 [Windows 特定的选项](#windows)。
 
 名称：Windows<br/> 类型：`*windows.Options`
 
@@ -328,9 +333,35 @@ func (b *App) beforeClose(ctx context.Context) (prevent bool) {
 
 #### 窗口半透明
 
-将此设置为 `true` 将使窗口半透明。 通常与[Webview 透明](#webview-透明) 结合使用以制作冰霜效果的应用程序。
+将此设置为 `true` 将使窗口半透明。 通常与 [Webview 透明](#webview-透明) 结合使用。
+
+对于 build 22621 之前的 Windows 11 版本，将使用 [BlurBehind](https://learn.microsoft.com/en-us/windows/win32/dwm/blur-ovw) 方法来实现半透明，这可能会很慢。 对于构建 build 22621 之后的 Windows 11 版本，这将启用速度更快的新半透明类型。 默认情况下，使用的半透明类型将由 Windows 确定。 要对此进行配置，请使用 [背景类型](#背景类型) 选项。
 
 名称：WindowIsTranslucent<br/> 类型：`bool`
+
+#### 背景类型
+
+:::note
+
+
+需要 Windows 11 build 22621 或更高版本。
+
+:::
+
+
+设置窗口的半透明类型。 这仅在 [窗口半透明](#窗口半透明) 设置为 `true` 时适用。
+
+名称：BackdropType<br/> 类型：`windows.BackdropType`
+
+值可以是以下之一：
+
+| 值       | 描述                                                                               |
+| ------- | -------------------------------------------------------------------------------- |
+| Auto    | 让 Windows 决定使用哪个背景                                                               |
+| None    | 不要使用半透明                                                                          |
+| Acrylic | 使用 [亚克力](https://learn.microsoft.com/en-us/windows/apps/design/style/acrylic) 效果 |
+| Mica    | 使用 [Mica](https://learn.microsoft.com/en-us/windows/apps/design/style/mica) 效果   |
+| Tabbed  | 使用 Tabbed。 这是一个类似于 Mica 的背景。                                                     |
 
 #### 禁用窗口图标
 
@@ -450,7 +481,7 @@ ResizeDebounceMS 是调整窗口大小时去抖动 webview2 重绘的时间量�
 
 #### 待机回调
 
-如果设置，当 Windows 启动切换到低功耗模式（挂起/休眠）时，将调用此函数
+如果设置，当 Windows 启动切换到低功耗模式（挂起/休眠）时将调用此函数
 
 名称：OnSuspend<br/> 类型：`func()`
 
@@ -462,7 +493,7 @@ ResizeDebounceMS 是调整窗口大小时去抖动 webview2 重绘的时间量�
 
 ### Mac
 
-这定义了 [Mac 特定的选项](#mac-特定选项)。
+这定义了 [Mac 特定的选项](#mac)。
 
 名称：Mac<br/> 类型：`*mac.Options`
 
@@ -470,9 +501,9 @@ ResizeDebounceMS 是调整窗口大小时去抖动 webview2 重绘的时间量�
 
 TitleBar 结构提供了配置标题栏外观的能力。
 
-名称：TitleBar<br/> 类型：[`*mac.TitleBar`](#标题栏结构)
+名称：TitleBar<br/> 类型：[`*mac.TitleBar`](#标题栏结构体)
 
-##### 标题栏结构
+##### 标题栏结构体
 
 可以使用 TitleBar 选项自定义应用程序的标题栏：
 
@@ -487,14 +518,14 @@ type TitleBar struct {
 }
 ```
 
-| 设置                         | 描述                                                                                                                                                 |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TitlebarAppearsTransparent | 使标题栏透明。 这具有隐藏标题栏和内容填充窗口的效果。 [苹果文档](https://developer.apple.com/documentation/appkit/nswindow/1419167-titlebarappearstransparent?language=objc)     |
-| HideTitle                  | 隐藏窗口的标题。 [苹果文档](https://developer.apple.com/documentation/appkit/nswindowtitlevisibility?language=objc)                                            |
-| HideTitleBar               | Removes [NSWindowStyleMaskTitled](https://developer.apple.com/documentation/appkit/nswindowstylemask/nswindowstylemasktitled/) from the style mask |
-| FullSizeContent            | 使 webview 填满整个窗口。 [苹果文档](https://developer.apple.com/documentation/appkit/nswindowstylemask/nswindowstylemaskfullsizecontentview)                  |
-| UseToolbar                 | 向窗口添加默认工具栏。 [苹果文档](https://developer.apple.com/documentation/appkit/nstoolbar?language=objc)                                                       |
-| HideToolbarSeparator       | 删除工具栏下方的线条。 [苹果文档](https://developer.apple.com/documentation/appkit/nstoolbar/1516954-showsbaselineseparator?language=objc)                        |
+| 设置                         | 描述                                                                                                                                             |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| TitlebarAppearsTransparent | 使标题栏透明。 这具有隐藏标题栏和内容填充窗口的效果。 [苹果文档](https://developer.apple.com/documentation/appkit/nswindow/1419167-titlebarappearstransparent?language=objc) |
+| HideTitle                  | 隐藏窗口的标题。 [苹果文档](https://developer.apple.com/documentation/appkit/nswindowtitlevisibility?language=objc)                                        |
+| HideTitleBar               | 从 style mask 中删除 [NSWindowStyleMaskTitled](https://developer.apple.com/documentation/appkit/nswindowstylemask/nswindowstylemasktitled/)        |
+| FullSizeContent            | 使 webview 填满整个窗口。 [苹果文档](https://developer.apple.com/documentation/appkit/nswindowstylemask/nswindowstylemaskfullsizecontentview)              |
+| UseToolbar                 | 向窗口添加默认工具栏。 [苹果文档](https://developer.apple.com/documentation/appkit/nstoolbar?language=objc)                                                   |
+| HideToolbarSeparator       | 删除工具栏下方的线条。 [苹果文档](https://developer.apple.com/documentation/appkit/nstoolbar/1516954-showsbaselineseparator?language=objc)                    |
 
 预配置的标题栏设置可用：
 
@@ -518,7 +549,7 @@ Mac: &mac.Options{
 
 Appearance 用于根据 Apple 的 [NSAppearance](https://developer.apple.com/documentation/appkit/nsappearancename?language=objc) 名称设置您的应用程序的样式。
 
-名称：Appearance<br/> 类型：[`mac.AppearanceType`](#appearance-type)
+名称：Appearance<br/> 类型：[`mac.AppearanceType`](#外观类型)
 
 ##### 外观类型
 
@@ -545,7 +576,7 @@ Mac: &mac.Options{
 
 #### Webview 透明
 
-当使用 `alpha` 值 `0` 时，将此设置为 true 将使 webview 背景透明。 这意味着如果您在 CSS 中使用 `rgba(0,0,0,0)` 作为 `background-color`，则主机窗口将显示出来。 通常与 [窗口半透明](#窗口半透明) 结合使用以制作看起来冷冰冰的应用程序。
+当使用 `alpha` 值 `0` 时，将此设置为 true 将使 webview 背景透明。 这意味着如果您在 CSS 中使用 `rgba(0,0,0,0)` 作为 `background-color`，则主机窗口将显示出来。 通常与 [窗口半透明](#窗口半透明-1) 结合使用以制作看起来冷冰冰的应用程序。
 
 名称：WebviewIsTransparent<br/> 类型：`bool`
 
@@ -559,9 +590,9 @@ Mac: &mac.Options{
 
 此配置允许您在“AppMenu”角色创建的应用程序菜单中设置“关于”菜单项的标题、消息和图标。
 
-名称：About<br/> 类型：[`*mac.AboutInfo`](#about-struct)
+名称：About<br/> 类型：[`*mac.AboutInfo`](#关于结构体)
 
-##### 关于结构
+##### 关于结构体
 
 ```go
 
@@ -634,7 +665,7 @@ func main() {
 
 ### Linux
 
-这定义了 [Linux 特定的选项](#linux-特定选项)。
+这定义了 [Linux 特定的选项](#linux)。
 
 名称：Linux<br/> 类型：`*linux.Options`
 
